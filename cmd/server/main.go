@@ -28,6 +28,19 @@ func main() {
 		log.Fatalf("could not create channel in RabbitMQ: %v", err)
 	}
 
+	_, queue, err := pubsub.DeclareAndBind(
+		connection,
+		routing.ExchangePerilTopic,
+		routing.GameLogSlug,
+		routing.GameLogSlug+".*",
+		pubsub.SimpleQueueDurable)
+
+	if err != nil {
+		log.Fatalf("could not subscribe to pause: %v", err)
+	}
+
+	fmt.Printf("Queue %v declared and bound!\n", queue.Name)
+
 	gamelogic.PrintServerHelp()
 
 	for {
@@ -57,18 +70,4 @@ func main() {
 			fmt.Println("Unknown command")
 		}
 	}
-}
-
-func updatePlayingState(ch *amqp.Channel, isPaused bool) error {
-
-	playingState := routing.PlayingState{
-		IsPaused: isPaused,
-	}
-
-	err := pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey, playingState)
-	if err != nil {
-		return fmt.Errorf("could not publish to RabbitMQ: %v", err)
-	}
-
-	return nil
 }
