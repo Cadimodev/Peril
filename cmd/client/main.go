@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -104,7 +105,15 @@ func main() {
 		case "help":
 			gamelogic.PrintClientHelp()
 		case "spam":
-			fmt.Println("Spamming not allowed yet")
+			if len(input) != 2 {
+				fmt.Println("usage: spam <n>")
+				continue
+			}
+			numSpam, err := strconv.Atoi(input[1])
+			if err != nil {
+				log.Fatalf("could not handle spam command: %v", err)
+			}
+			gamelogic.ExecuteSpam(numSpam, channel, gameState.GetUsername())
 		case "quit":
 			gamelogic.PrintQuit()
 			return

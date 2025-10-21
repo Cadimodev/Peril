@@ -7,6 +7,9 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func PrintClientHelp() {
@@ -89,4 +92,17 @@ func (gs *GameState) CommandStatus() {
 	for _, unit := range p.Units {
 		fmt.Printf("* %v: %v, %v\n", unit.ID, unit.Location, unit.Rank)
 	}
+}
+
+func ExecuteSpam(numSpam int, ch *amqp.Channel, username string) {
+
+	for range numSpam {
+		msg := GetMaliciousLog()
+
+		err := pubsub.PublishGameLog(ch, username, msg)
+		if err != nil {
+			fmt.Printf("error publishing malicious log: %s\n", err)
+		}
+	}
+	fmt.Printf("Published %v malicious logs\n", numSpam)
 }
